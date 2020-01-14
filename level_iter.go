@@ -558,8 +558,10 @@ func (l *levelIter) skipEmptyFileBackward() (*InternalKey, []byte) {
 				l.smallestBoundary = &l.syntheticBoundary
 				return l.smallestBoundary, nil
 			}
-			// If the boundary is a range deletion tombstone, return that key.
-			if f.Smallest.Kind() == InternalKeyKindRangeDelete {
+			// If the boundary is a range deletion tombstone or a regular deletion
+			// tombstone at seqnum 0, return that key.
+			if f.Smallest.Kind() == InternalKeyKindRangeDelete ||
+				(f.Smallest.Kind() == InternalKeyKindDelete && f.Smallest.SeqNum() == 0) {
 				l.smallestBoundary = &f.Smallest
 				return l.smallestBoundary, nil
 			}
